@@ -1,0 +1,5 @@
+{
+    "uuid": "sessionManager@scollins",
+    "name": "Session Manager",
+    "description": "Provides easy access to shut down, restart, etc"
+}
