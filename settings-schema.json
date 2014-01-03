@@ -10,6 +10,12 @@
         "default": "system-shutdown"
     },
     
+    "symbolicPanelIcon": {
+        "type": "checkbox",
+        "description": "Symbolic",
+        "default": true
+    },
+    
     "panelText": {
         "type": "entry",
         "description": "Panel Text",
@@ -26,90 +32,9 @@
         "description": "Icon Size"
     },
     
-    "symbolic": {
+    "symbolicMenuIcons": {
         "type": "checkbox",
-        "description": "Use symbolic icons",
+        "description": "Symbolic icons in menu",
         "default": true
-    },
-    
-    "sep1": {
-        "type": "separator"
-    },
-    
-    "logOffHeader": {
-        "type": "header",
-        "description": "Log Off"
-    },
-    
-    "logOffShow": {
-        "type": "checkbox",
-        "description": "Show",
-        "default": true
-    },
-    
-    "logOffIcon": {
-        "type": "iconfilechooser",
-        "description": "Icon",
-        "default": "media-eject"
-    },
-    
-    "logOffCommand": {
-        "type": "entry",
-        "description": "command",
-        "default": "dbus-send --session --type=method_call --print-reply --dest=org.gnome.SessionManager /org/gnome/SessionManager org.gnome.SessionManager.Logout uint32:1"
-    },
-    
-    "sep2": {
-        "type": "separator"
-    },
-    
-    "restartHeader": {
-        "type": "header",
-        "description": "Restart"
-    },
-    
-    "restartShow": {
-        "type": "checkbox",
-        "description": "Show",
-        "default": true
-    },
-    
-    "restartIcon": {
-        "type": "iconfilechooser",
-        "description": "Icon",
-        "default": "view-refresh"
-    },
-    
-    "restartCommand": {
-        "type": "entry",
-        "description": "command",
-        "default": "dbus-send --system --print-reply --system --dest=org.freedesktop.ConsoleKit /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart"
-    },
-    
-    "sep3": {
-        "type": "separator"
-    },
-    
-    "shutDownHeader": {
-        "type": "header",
-        "description": "Restart"
-    },
-    
-    "shutDownShow": {
-        "type": "checkbox",
-        "description": "Show",
-        "default": true
-    },
-    
-    "shutDownIcon": {
-        "type": "iconfilechooser",
-        "description": "Icon",
-        "default": "system-shutdown"
-    },
-    
-    "shutDownCommand": {
-        "type": "entry",
-        "description": "command",
-        "default": "dbus-send --system --print-reply --system --dest=org.freedesktop.ConsoleKit /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop"
     }
 }
