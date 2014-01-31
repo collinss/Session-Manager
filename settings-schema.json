@@ -30,11 +30,5 @@
         "units": "px",
         "step": 2,
         "description": "Icon Size"
-    },
-    
-    "symbolicMenuIcons": {
-        "type": "checkbox",
-        "description": "Symbolic icons in menu",
-        "default": true
     }
 }

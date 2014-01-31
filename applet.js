@@ -9,7 +9,7 @@ const Util = imports.misc.util;
 const Lang = imports.lang;
 
 
-let button_path, menu_item_icon_size, use_symbolic_icons;
+let button_path, menu_item_icon_size;
 let has_console_kit, has_upower, has_systemd, session_manager;
 
 let CommandDispatcher = {
@@ -104,15 +104,8 @@ MenuItem.prototype = {
     },
     
     getIcon: function() {
-        let iconType, iconPath;
-        if ( use_symbolic_icons ) {
-            iconPath = button_path + this.id + "-symbolic.svg";
-            iconType = St.IconType.SYMBOLIC;
-        }
-        else {
-            iconPath = button_path + this.id + ".svg";
-            iconType = St.IconType.FULLCOLOR;
-        }
+        let iconPath = button_path + this.id + "-symbolic.svg";
+        let iconType = St.IconType.SYMBOLIC;
         
         let file = Gio.file_new_for_path(iconPath);
         let gicon = new Gio.FileIcon({ file: file });
@@ -196,7 +189,6 @@ MyApplet.prototype = {
         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicPanelIcon", "symbolicPanelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this.setPanelText);
         this.settings.bindProperty(Settings.BindingDirection.IN, "iconSize", "iconSize", this.buildMenu);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicMenuIcons", "symbolicMenuIcons", this.buildMenu);
     },
     
     buildMenu: function() {
@@ -205,7 +197,6 @@ MyApplet.prototype = {
             this.menu.removeAll();
             
             menu_item_icon_size = this.iconSize;
-            use_symbolic_icons = this.symbolicMenuIcons;
             
             //lock
             let lock = new MenuItem(this.menu, { id: "lock", title: "Lock Screen" });
