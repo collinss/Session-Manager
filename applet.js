@@ -187,11 +187,11 @@ MyApplet.prototype = {
         //check session manager
         if ( GLib.getenv("XDG_SEAT_PATH") ) session_manager = 0;
         else if ( GLib.file_test("/usr/bin/mdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 1;
-        else if (GLib.file_test("/usr/bin/gdmflexiserver", GLib.FileTest.EXISTS)) session_manager = 2;
+        else if ( GLib.file_test("/usr/bin/gdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 2;
     },
     
     _bindSettings: function() {
-        this.settings = new Settings.AppletSettings(this, this.metadata["uuid"], this.instanceId);
+        this.settings = new Settings.AppletSettings(this, this.metadata.uuid, this.instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelIcon", "panelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicPanelIcon", "symbolicPanelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this.setPanelText);
