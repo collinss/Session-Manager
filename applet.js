@@ -208,11 +208,11 @@ MyApplet.prototype = {
             for ( let i = 0; i < dFiles.length; i++ ) {
                 if ( GLib.file_test(dFiles[i], GLib.FileTest.EXISTS) ) {
                     let [a, output] = GLib.spawn_command_line_sync("grep -e \"Exec\" " + dFiles[i]);
-                    display_manager = String(output).split("/").pop();
+                    display_manager = String(output).split("/").pop().split("\n")[0];
+                    break;
                 }
             }
         }
-        
         if ( !display_manager ) global.log("Unable to determine display manager");
     },
     
