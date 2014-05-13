@@ -203,11 +203,17 @@ MyApplet.prototype = {
             let [a, output] = GLib.spawn_command_line_sync("grep -oE \"[^/]+$\" /etc/X11/default-display-manager");
             display_manager = String(output).split("\n")[0];
         }
-        else global.log("Unable to determine display manager");
+        else {
+            let dFiles = ["/etc/systemd/system/display-manager.service", "/etc/systemd/system-display-manager.service"];
+            for ( let i = 0; i < dFiles.length; i++ ) {
+                if ( GLib.file_test(dFiles[i], GLib.FileTest.EXISTS) ) {
+                    let [a, output] = GLib.spawn_command_line_sync("grep -e \"Exec\" " + dFiles[i]);
+                    display_manager = String(output).split("/").pop();
+                }
+            }
+        }
         
-        //if ( GLib.getenv("XDG_SEAT_PATH") ) session_manager = 0;
-        //else if ( GLib.file_test("/usr/bin/mdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 1;
-        //else if ( GLib.file_test("/usr/bin/gdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 2;
+        if ( !display_manager ) global.log("Unable to determine display manager");
     },
     
     _bindSettings: function() {
