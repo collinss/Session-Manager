@@ -10,7 +10,7 @@ const Lang = imports.lang;
 
 
 let button_path, menu_item_icon_size, use_symbolic_icons;
-let has_console_kit, has_upower, has_systemd, session_manager;
+let has_console_kit, has_upower, has_systemd, session_manager, display_manager;
 
 let CommandDispatcher = {
     shutDown: function() {
@@ -42,19 +42,33 @@ let CommandDispatcher = {
     },
     
     uSwitch: function() {
-        switch ( session_manager ) {
-            case 0: //lightdm
-                Util.spawnCommandLine("cinnamon-screensaver-command --lock");
-                Util.spawnCommandLine("dm-tool switch-to-greeter");
-                break;
-            case 1: //mdm
+        switch ( display_manager ) {
+            case "mdm":
                 Util.spawnCommandLine("mdmflexiserver");
                 break;
-            case 2: //gdm
+            case "gdm":
                 Util.spawnCommandLine("cinnamon-screensaver-command --lock");
                 Util.spawnCommandLine("gdmflexiserver");
                 break;
+            case "lxdm":
+                Util.spawnCommandLine("lxdm -c USER_SWITCH");
+                break;
+            case "lightdm":
+                
         }
+        //switch ( session_manager ) {
+        //    case 0: //lightdm
+        //        Util.spawnCommandLine("cinnamon-screensaver-command --lock");
+        //        Util.spawnCommandLine("dm-tool switch-to-greeter");
+        //        break;
+        //    case 1: //mdm
+        //        Util.spawnCommandLine("mdmflexiserver");
+        //        break;
+        //    case 2: //gdm
+        //        Util.spawnCommandLine("cinnamon-screensaver-command --lock");
+        //        Util.spawnCommandLine("gdmflexiserver");
+        //        break;
+        //}
     },
     
     guest: function() {
@@ -184,10 +198,16 @@ MyApplet.prototype = {
         let [a, output] = GLib.spawn_command_line_sync("ps -C systemd");
         if ( String(output).split("\n").length > 2 ) has_systemd = true;
         
-        //check session manager
-        if ( GLib.getenv("XDG_SEAT_PATH") ) session_manager = 0;
-        else if ( GLib.file_test("/usr/bin/mdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 1;
-        else if ( GLib.file_test("/usr/bin/gdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 2;
+        //check display manager
+        if ( GLib.file_test("/etc/X11/default-display-manager", GLib.FileTest.EXISTS) ) {
+            let [a, output] = GLib.spawn_command_line_sync("grep -oE \"[^/]+$\" /etc/X11/default-display-manager");
+            display_manager = String(output).split("\n")[0];
+        }
+        else global.log("Unable to determine display manager");
+        
+        //if ( GLib.getenv("XDG_SEAT_PATH") ) session_manager = 0;
+        //else if ( GLib.file_test("/usr/bin/mdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 1;
+        //else if ( GLib.file_test("/usr/bin/gdmflexiserver", GLib.FileTest.EXISTS) ) session_manager = 2;
     },
     
     _bindSettings: function() {
