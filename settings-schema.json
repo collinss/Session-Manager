@@ -7,13 +7,7 @@
     "panelIcon": {
         "type": "iconfilechooser",
         "description": "Panel Icon",
-        "default": "system-shutdown"
-    },
-    
-    "symbolicPanelIcon": {
-        "type": "checkbox",
-        "description": "Symbolic",
-        "default": true
+        "default": "system-shutdown-symbolic"
     },
     
     "panelText": {

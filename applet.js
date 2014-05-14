@@ -1,5 +1,6 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
+const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
 const Applet = imports.ui.applet;
 const PopupMenu = imports.ui.popupMenu;
@@ -56,19 +57,6 @@ let CommandDispatcher = {
             case "lightdm":
                 
         }
-        //switch ( session_manager ) {
-        //    case 0: //lightdm
-        //        Util.spawnCommandLine("cinnamon-screensaver-command --lock");
-        //        Util.spawnCommandLine("dm-tool switch-to-greeter");
-        //        break;
-        //    case 1: //mdm
-        //        Util.spawnCommandLine("mdmflexiserver");
-        //        break;
-        //    case 2: //gdm
-        //        Util.spawnCommandLine("cinnamon-screensaver-command --lock");
-        //        Util.spawnCommandLine("gdmflexiserver");
-        //        break;
-        //}
     },
     
     guest: function() {
@@ -219,7 +207,6 @@ MyApplet.prototype = {
     _bindSettings: function() {
         this.settings = new Settings.AppletSettings(this, this.metadata.uuid, this.instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelIcon", "panelIcon", this.setPanelIcon);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicPanelIcon", "symbolicPanelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this.setPanelText);
         this.settings.bindProperty(Settings.BindingDirection.IN, "iconSize", "iconSize", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicMenuIcons", "symbolicMenuIcons", this.buildMenu);
@@ -283,38 +270,22 @@ MyApplet.prototype = {
     },
     
     setPanelIcon: function() {
-        if ( this.panelIcon.split("/").length > 1 ) {
-            if ( this.symbolicPanelIcon && this.panelIcon.search("-symbolic.svg") > 0 ) this.set_applet_icon_symbolic_path(this.panelIcon);
-            else this.set_applet_icon_path(this.panelIcon);
+        if ( this.panelIcon == "" ||
+           ( GLib.path_is_absolute(this.panelIcon) &&
+             GLib.file_test(this.panelIcon, GLib.FileTest.EXISTS) ) ) {
+            if ( this.panelIcon.search("-symbolic.svg") == -1 ) this.set_applet_icon_path(this.panelIcon);
+            else this.set_applet_icon_symbolic_path(this.panelIcon);
         }
-        else {
-            if ( this.symbolicPanelIcon ) this.set_applet_icon_symbolic_name(this.panelIcon);
+        else if ( Gtk.IconTheme.get_default().has_icon(this.panelIcon) ) {
+            if ( this.panelIcon.search("-symbolic") != -1 ) this.set_applet_icon_symbolic_name(this.panelIcon);
             else this.set_applet_icon_name(this.panelIcon);
         }
+        else this.set_applet_icon_symbolic_name("system-shutdown");
     },
     
     setPanelText: function() {
         if ( this.panelText ) this.set_applet_label(this.panelText);
         else this.set_applet_label("");
-    },
-    
-    set_applet_icon_symbolic_path: function(icon_path) {
-        if (this._applet_icon_box.child) this._applet_icon_box.child.destroy();
-        
-        if (icon_path){
-            let file = Gio.file_new_for_path(icon_path);
-            let gicon = new Gio.FileIcon({ file: file });
-            if (this._scaleMode) {
-                let height = (this._panelHeight / DEFAULT_PANEL_HEIGHT) * PANEL_SYMBOLIC_ICON_DEFAULT_HEIGHT;
-                this._applet_icon = new St.Icon({gicon: gicon, icon_size: height,
-                                                icon_type: St.IconType.SYMBOLIC, reactive: true, track_hover: true, style_class: 'applet-icon' });
-            } else {
-                this._applet_icon = new St.Icon({gicon: gicon, icon_size: 22, icon_type: St.IconType.FULLCOLOR, reactive: true, track_hover: true, style_class: 'applet-icon' });
-            }
-            this._applet_icon_box.child = this._applet_icon;
-        }
-        this.__icon_type = -1;
-        this.__icon_name = icon_path;
     }
 }
 
