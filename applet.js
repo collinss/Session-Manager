@@ -81,26 +81,24 @@ let CommandDispatcher = {
 }
 
 
-function MenuItem(menu, info, params) {
-    this._init(menu, info, params);
+function CommandItem(commandId, title) {
+    this._init(commandId, title);
 }
 
-MenuItem.prototype = {
+CommandItem.prototype = {
     __proto__: PopupMenu.PopupBaseMenuItem.prototype,
     
-    _init: function(menu, info, params) {
+    _init: function(commandId, title) {
         try {
             
-            this.menu = menu;
-            this.id = info.id;
+            this.commandId = commandId;
             
-            PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+            PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
             
             this.addActor(this.getIcon());
             
-            let label = new St.Label({ text: info.title });
+            let label = new St.Label({ text: title });
             this.addActor(label);
-            this.actor._delegate = this;
             
         } catch (e){
             global.logError(e);
@@ -110,11 +108,11 @@ MenuItem.prototype = {
     getIcon: function() {
         let iconType, iconPath;
         if ( use_symbolic_icons ) {
-            iconPath = button_path + this.id + "-symbolic.svg";
+            iconPath = button_path + this.commandId + "-symbolic.svg";
             iconType = St.IconType.SYMBOLIC;
         }
         else {
-            iconPath = button_path + this.id + ".svg";
+            iconPath = button_path + this.commandId + ".svg";
             iconType = St.IconType.FULLCOLOR;
         }
         
@@ -127,8 +125,8 @@ MenuItem.prototype = {
     
     activate: function() {
         try {
-            this.menu.close();
-            CommandDispatcher[this.id]();
+            this.emit("activate", this, false);
+            CommandDispatcher[this.commandId]();
         } catch (e) {
             global.logError(e);
         }
@@ -225,47 +223,47 @@ MyApplet.prototype = {
             use_symbolic_icons = this.symbolicMenuIcons;
             
             //lock
-            let lock = new MenuItem(this.menu, { id: "lock", title: "Lock Screen" });
+            let lock = new CommandItem("lock", _("Lock Screen"));
             this.menu.addMenuItem(lock);
             
             //switch user
-            let uSwitch = new MenuItem(this.menu, { id: "uSwitch", title: "Switch User" });
+            let uSwitch = new CommandItem("uSwitch", _("Switch User"));
             this.menu.addMenuItem(uSwitch);
             
             //guest
             if ( session_manager == 0 ) {
-                let guest = new MenuItem(this.menu, { id: "guest", title: "Guest Session" });
+                let guest = new CommandItem("guest", _("Guest Session"));
                 this.menu.addMenuItem(guest);
             }
             
             //log off
-            let logOff = new MenuItem(this.menu, { id: "logOff", title: "Log Off" });
+            let logOff = new CommandItem("logOff", _("Log Off"));
             this.menu.addMenuItem(logOff);
             
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             
             //suspend
-            let suspend = new MenuItem(this.menu, { id: "suspend", title: "Suspend" });
+            let suspend = new CommandItem("suspend", _("Suspend"));
             this.menu.addMenuItem(suspend);
             
             //sleep
             if ( has_systemd ) {
-                let sleep = new MenuItem(this.menu, { id: "sleep", title: "Sleep" });
+                let sleep = new CommandItem("sleep", _("Sleep"));
                 this.menu.addMenuItem(sleep);
             }
             
             //hibernate
-            let hibernate = new MenuItem(this.menu, { id: "hibernate", title: "Hibernate" });
+            let hibernate = new CommandItem("hibernate", _("Hibernate"));
             this.menu.addMenuItem(hibernate);
             
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             
             //restart
-            let restart = new MenuItem(this.menu, { id: "restart", title: "Restart" });
+            let restart = new CommandItem("restart", _("Restart"));
             this.menu.addMenuItem(restart);
             
             //shut down
-            let shutDown = new MenuItem(this.menu, { id: "shutDown", title: "Shut Down" });
+            let shutDown = new CommandItem("shutDown", _("Shut Down"));
             this.menu.addMenuItem(shutDown);
             
         } catch(e) {
