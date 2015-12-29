@@ -2,6 +2,7 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
+const AccountsService = imports.gi.AccountsService;
 
 const Applet = imports.ui.applet;
 const PopupMenu = imports.ui.popupMenu;
@@ -134,6 +135,29 @@ CommandItem.prototype = {
 }
 
 
+function UserItem(user) {
+    this._init(user);
+}
+
+UserItem.prototype = {
+    __proto__: PopupMenu.PopupBaseMenuItem.prototype,
+    
+    _init: function(user) {
+        PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
+
+        this.user = user;
+        
+        let iconFile = user.get_icon_file();
+        if ( !GLib.file_test(iconFile, GLib.FileTest.EXISTS) ) iconFile = "/usr/share/cinnamon/faces/user-generic.png";
+        let icon = new St.Icon({ gicon: new Gio.FileIcon({ file: Gio.file_new_for_path(iconFile) }), iconType: St.IconType.FULLCOLOR, icon_size: 16 });
+        this.addActor(icon);
+
+        let label = new St.Label({ text: user.get_real_name() });
+        this.addActor(label);
+    }
+}
+
+
 function MyApplet(metadata, orientation, panel_height, instanceId) {
     this._init(metadata, orientation, panel_height, instanceId);
 }
@@ -143,7 +167,6 @@ MyApplet.prototype = {
     
     _init: function(metadata, orientation, panel_height, instanceId) {
         try {
-            
             this.metadata = metadata;
             this.instanceId = instanceId;
             this.orientation = orientation;
@@ -161,11 +184,12 @@ MyApplet.prototype = {
             this.menuManager = new PopupMenu.PopupMenuManager(this);
             this.menu = new Applet.AppletPopupMenu(this, this.orientation);
             this.menuManager.addMenu(this.menu);
-            
+
             this.checkSession();
-            
             this.buildMenu();
             
+            this.userManager = AccountsService.UserManager.get_default();
+            this.userManager.connect("notify::is-loaded", Lang.bind(this, this.updateUsers));
         } catch(e) {
             global.logError(e);
         }
@@ -205,6 +229,33 @@ MyApplet.prototype = {
         }
         if ( !display_manager ) global.log("Unable to determine display manager");
     },
+
+    updateUsers: function() {
+
+    try {
+            this.userSection.removeAll();
+    
+            let users = this.userManager.list_users();
+    
+            for ( let user of users ) {
+                let item = new UserItem(user);
+                this.userSection.addMenuItem(item);
+                item.connect("activate", Lang.bind(this, function() {
+
+                try {
+                                    this.userManager.activate_user_session(user);
+                    global.logWarning(user.get_user_name());
+                
+                } catch(e) {
+                global.logError(e);
+                }
+                                }));
+            }
+    
+    } catch(e) {
+    global.logError(e);
+    }
+        },
     
     bindSettings: function() {
         this.settings = new Settings.AppletSettings(this, this.metadata.uuid, this.instanceId);
@@ -221,6 +272,9 @@ MyApplet.prototype = {
             
             menu_item_icon_size = this.iconSize;
             use_symbolic_icons = this.symbolicMenuIcons;
+
+            this.userSection = new PopupMenu.PopupMenuSection();
+            this.menu.addMenuItem(this.userSection);
             
             //lock
             let lock = new CommandItem("lock", _("Lock Screen"));
